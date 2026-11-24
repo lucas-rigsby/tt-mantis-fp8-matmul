@@ -40,6 +40,7 @@ def n(rtl, gl):
 WRITE, CLEAR, READ, NOP = 0, 1, 2, 3
 JTAG_MASK = 0b1111_1000            # uio_in[7:3]: tck, (4), tms, tdi, (7)
 _QUIET_RUN = {}                    # jtag_inert_quiet -> jtag_inert_noisy
+SETTLE_NS = 5                      # output sampling point after the rising edge
 
 
 class Top:
@@ -63,6 +64,9 @@ class Top:
         self.low = (cmd << 1) | valid
         self._drive_uio()
         await RisingEdge(self.dut.clk)
+        # Sample after the edge has settled: in the gate-level netlist the
+        # flip-flop outputs change UNIT_DELAY (1 ns) after the edge.
+        await Timer(SETTLE_NS, unit="ns")
         await ReadOnly()
         uo, uio, oe = int(self.dut.uo_out.value), int(self.dut.uio_out.value), int(self.dut.uio_oe.value)
         assert oe == 0x90, f"P1: uio_oe = {oe:#04x}"
