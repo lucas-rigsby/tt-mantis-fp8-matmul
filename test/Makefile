@@ -6,7 +6,8 @@ SIM ?= icarus
 FST ?= -fst # Use more efficient FST format
 TOPLEVEL_LANG ?= verilog
 SRC_DIR = $(PWD)/../src
-PROJECT_SOURCES = project.v
+PROJECT_SOURCES = fp8_unpack.v fp8_mul.v bf16_add_s1.v bf16_add_s2.v \
+                  mantis_stage.v mantis_dp_shared.v tt_um_mantis.v
 
 ifneq ($(GATES),yes)
 
@@ -28,6 +29,9 @@ VERILOG_SOURCES += $(PDK_ROOT)/sky130A/libs.ref/sky130_fd_sc_hd/verilog/sky130_f
 
 # this gets copied in by the GDS action workflow
 VERILOG_SOURCES += $(PWD)/gate_level_netlist.v
+
+# Tell test.py that internal signals are not available
+PLUSARGS += +GL_TEST
 
 endif
 

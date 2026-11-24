@@ -1,42 +1,44 @@
 ![](../../workflows/gds/badge.svg) ![](../../workflows/docs/badge.svg) ![](../../workflows/test/badge.svg) ![](../../workflows/fpga/badge.svg)
 
-# Tiny Tapeout Verilog Project Template
+# MANTIS: FP8 matrix multiplier for Tiny Tapeout
 
-- [Read the documentation for project](docs/info.md)
+MANTIS (`tt_um_mantis`) multiplies a $2 \times K$ matrix by a $K \times 2$ matrix
+of FP8 values (E4M3FN or E5M2) and accumulates the result in BF16. It occupies a
+$1 \times 2$ tile slot on Sky130 and runs at 50 MHz.
 
-## What is Tiny Tapeout?
+- [Datasheet: how it works and how to test it](docs/info.md)
+- [Development repository](https://github.com/lucas-rigsby/mantis-fp8-matmul):
+  specification, design notes, unit tests, formal proofs and synthesis scripts
 
-Tiny Tapeout is an educational project that aims to make it easier and cheaper than ever to get your digital and analog designs manufactured on a real chip.
+This repository is the Tiny Tapeout submission. The files in `src/` are copied
+from `rtl/` in the development repository, and `test/test.py` is the pin-level
+test suite from that repository adapted to the Tiny Tapeout testbench.
 
-To learn more and get started, visit https://tinytapeout.com.
+## Layout
 
-## Set up your Verilog project
+| Path | Contents |
+|---|---|
+| `src/` | Verilog sources, top module `tt_um_mantis` |
+| `info.yaml` | project metadata, pinout and source list |
+| `docs/info.md` | datasheet page |
+| `test/test.py` | cocotb tests through `test/tb.v` |
+| `test/mantis_ref.py` | bit-accurate Python reference model |
 
-1. Add your Verilog files to the `src` folder.
-2. Edit the [info.yaml](info.yaml) and update information about your project, paying special attention to the `source_files` and `top_module` properties. If you are upgrading an existing Tiny Tapeout project, check out our [online info.yaml migration tool](https://tinytapeout.github.io/tt-yaml-upgrade-tool/).
-3. Edit [docs/info.md](docs/info.md) and add a description of your project.
-4. Adapt the testbench to your design. See [test/README.md](test/README.md) for more information.
+## Running the tests
 
-The GitHub action will automatically build the ASIC files using [LibreLane](https://www.zerotoasiccourse.com/terminology/librelane/).
+The tests need Icarus Verilog and the packages in `test/requirements.txt`.
 
-## Enable GitHub actions to build the results page
+```bash
+cd test && make
+```
 
-- [Enabling GitHub Pages](https://tinytapeout.com/faq/#my-github-action-is-failing-on-the-pages-part)
+After the GDS workflow produces a gate-level netlist, the same tests run against
+it with `make GATES=yes`. At gate level the checks that probe internal signals
+are skipped and the random workloads are shorter.
 
-## Resources
+## Tiny Tapeout
 
-- [FAQ](https://tinytapeout.com/faq/)
-- [Digital design lessons](https://tinytapeout.com/digital_design/)
-- [Learn how semiconductors work](https://tinytapeout.com/siliwiz/)
-- [Join the community](https://tinytapeout.com/discord)
-- [Build your design locally](https://www.tinytapeout.com/guides/local-hardening/)
-
-## What next?
-
-- [Submit your design to the next shuttle](https://app.tinytapeout.com/).
-- Edit [this README](README.md) and explain your design, how it works, and how to test it.
-- Share your project on your social network of choice:
-  - LinkedIn [#tinytapeout](https://www.linkedin.com/search/results/content/?keywords=%23tinytapeout) [@TinyTapeout](https://www.linkedin.com/company/100708654/)
-  - Mastodon [#tinytapeout](https://chaos.social/tags/tinytapeout) [@matthewvenn](https://chaos.social/@matthewvenn)
-  - X (formerly Twitter) [#tinytapeout](https://twitter.com/hashtag/tinytapeout) [@tinytapeout](https://twitter.com/tinytapeout)
-  - Bluesky [@tinytapeout.com](https://bsky.app/profile/tinytapeout.com)
+Tiny Tapeout is an educational project that makes it easier and cheaper to get
+digital and analog designs manufactured on a real chip. See
+https://tinytapeout.com, the [FAQ](https://tinytapeout.com/faq/) and the guide to
+[building a design locally](https://www.tinytapeout.com/guides/local-hardening/).
