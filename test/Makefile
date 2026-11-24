@@ -7,7 +7,7 @@ FST ?= -fst # Use more efficient FST format
 TOPLEVEL_LANG ?= verilog
 SRC_DIR = $(PWD)/../src
 PROJECT_SOURCES = fp8_unpack.v fp8_mul.v bf16_add_s1.v bf16_add_s2.v \
-                  mantis_stage.v mantis_dp_shared.v tt_um_mantis.v
+                  mantis_stage.v mantis_dp_shared.v tt_um_lucas_rigsby_mantis.v
 
 ifneq ($(GATES),yes)
 
@@ -43,7 +43,7 @@ VERILOG_SOURCES += $(PWD)/tb.v
 TOPLEVEL = tb
 
 # List test modules to run, separated by commas and without the .py suffix:
-COCOTB_TEST_MODULES = test
+COCOTB_TEST_MODULES = test,test_bringup
 
 # include cocotb's make rules to take care of the simulator setup
 include $(shell cocotb-config --makefiles)/Makefile.sim

@@ -2,7 +2,7 @@
 
 # MANTIS: FP8 matrix multiplier for Tiny Tapeout
 
-MANTIS (`tt_um_mantis`) multiplies a $2 \times K$ matrix by a $K \times 2$ matrix
+MANTIS (`tt_um_lucas_rigsby_mantis`) multiplies a $2 \times K$ matrix by a $K \times 2$ matrix
 of FP8 values (E4M3FN or E5M2) and accumulates the result in BF16. It occupies a
 $1 \times 2$ tile slot on Sky130 and runs at 50 MHz.
 
@@ -18,7 +18,7 @@ test suite from that repository adapted to the Tiny Tapeout testbench.
 
 | Path | Contents |
 |---|---|
-| `src/` | Verilog sources, top module `tt_um_mantis` |
+| `src/` | Verilog sources, top module `tt_um_lucas_rigsby_mantis` |
 | `info.yaml` | project metadata, pinout and source list |
 | `docs/info.md` | datasheet page |
 | `test/test.py` | cocotb tests through `test/tb.v` |

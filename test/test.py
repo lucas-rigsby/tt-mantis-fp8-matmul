@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-"""Pin-level cocotb tests for tt_um_mantis, run through tb.v.
+"""Pin-level cocotb tests for tt_um_lucas_rigsby_mantis, run through tb.v.
 
 Ported from tb/test_top.py in the development repository
 (https://github.com/lucas-rigsby/mantis-fp8-matmul), which also holds the

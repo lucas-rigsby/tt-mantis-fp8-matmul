@@ -1,5 +1,5 @@
-// tt_um_mantis: MANTIS 2x2 FP8 -> BF16 matrix-multiply accelerator,
-// Tiny Tapeout top level (docs/spec.md rev 0.4, baseline without JTAG).
+// tt_um_lucas_rigsby_mantis: MANTIS 2x2 FP8 -> BF16 matrix-multiply accelerator,
+// Tiny Tapeout top level (docs/spec.md rev 0.6, baseline without JTAG).
 //
 // Pins (spec Interfaces):
 //   ui_in[7:0]   operand byte (WRITE) / format bits (CLEAR)
@@ -15,7 +15,7 @@
 // and CLEAR flushing live in mantis_dp_shared.
 `default_nettype none
 
-module tt_um_mantis (
+module tt_um_lucas_rigsby_mantis (
     input  wire [7:0] ui_in,
     output wire [7:0] uo_out,
     input  wire [7:0] uio_in,
