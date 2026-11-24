@@ -2,19 +2,23 @@
 // Chosen organization (docs/feasibility.md, 2026-11-23).
 //
 // One fp8_mul and one two-stage BF16 adder, 1 MAC per clock, round-robin over
-// the four accumulators. Each accumulator is read once per 4-clock step
-// interval and written 2 clocks after it is read, so there is no
-// read-after-write hazard on an accumulator (R10, P11).
+// the four accumulators. Each accumulator is read in stage M, while its
+// product is being formed, and written back 3 clocks later. The next read of
+// the same accumulator comes at least 4 clocks after the previous read, so it
+// always sees the committed value (R10, P11).
 //
 // Pipeline (issue = 4th WRITE sampled at edge t0), product j = 0..3:
 //   edge t0     : op regs <= {slot0, slot1, slot2, din}, run <= 1, cnt <= 0
 //   cycle t0+j  : M  - multiply product j (C00, C10, C01, C11)
-//   edge t0+j+1 : prod/ptag/pv registered
-//   cycle t0+j+1: A1 - bf16_add_s1(acc[ptag], prod): specials, align, add
+//   cycle t0+j  : M  - also select acc[tag] for product j
+//   edge t0+j+1 : prod/pacc/ptag/pv registered
+//   cycle t0+j+1: A1 - bf16_add_s1(pacc, prod): specials, align, add
 //   edge t0+j+2 : stage-1 bundle/qtag/qv registered
 //   cycle t0+j+2: A2 - bf16_add_s2: normalize, round, pack
 //   edge t0+j+3 : acc[qtag] commits; last (j=3) at t0+6 -> drain = 6 (R11)
-// The adder is split so that each stage meets 20 ns at ss_100C_1v60.
+// The adder is split so that each stage meets 20 ns at ss_100C_1v60. The
+// accumulator select is done in M rather than A1 to keep the 4:1 multiplexer
+// and its high-fanout select out of the A1 path (post-route ss timing).
 // A new issue at edge t0+4 reloads the op regs just as product 3 leaves them.
 // CLEAR or reset clears run/pv/qv and the accumulators (R13, R14, P10).
 `default_nettype none
@@ -44,6 +48,7 @@ module mantis_dp_shared (
     reg         pv, qv;               // stage M -> A1, A1 -> A2 valids
     reg  [1:0]  ptag, qtag;           // accumulator index {i, j}
     reg  [15:0] prod;
+    reg  [15:0] pacc;                 // accumulator selected in M for product j
     reg  [15:0] c [0:3];              // index 2*i + j: C00, C01, C10, C11
     // A1 -> A2 bundle
     reg  [11:0] q_sum;
@@ -62,7 +67,7 @@ module mantis_dp_shared (
     wire [15:0] spec_val;
 
     fp8_mul     u_mul (.a(mul_a), .b(mul_b), .fmt_a(fmt_a), .fmt_b(fmt_b), .p(m));
-    bf16_add_s1 u_a1  (.a(c[ptag]), .b(prod), .sum(sum), .e_big(e_big),
+    bf16_add_s1 u_a1  (.a(pacc), .b(prod), .sum(sum), .e_big(e_big),
                        .s_big(s_big), .spec(spec), .spec_val(spec_val));
     bf16_add_s2 u_a2  (.sum(q_sum), .e_big(q_e_big), .s_big(q_s_big),
                        .spec(q_spec), .spec_val(q_spec_val), .y(s));
@@ -92,6 +97,7 @@ module mantis_dp_shared (
         end
         if (run) begin
             prod <= m;
+            pacc <= c[tag];
             ptag <= tag;
         end
         if (pv) begin
